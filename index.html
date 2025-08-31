@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌿 Plant Tracker Pro</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0fdf4;
+      margin: 0;
+      padding: 0;
+      color: #1b4332;
+    }
+    header {
+      background: linear-gradient(135deg, #2d6a4f, #40916c);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+    }
+    nav {
+      background: #1b4332;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #2d6a4f;
+      margin-top: 0;
+    }
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input, select, textarea, button {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+    textarea {
+      grid-column: span 2;
+      resize: vertical;
+    }
+    button {
+      background: #2d6a4f;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #1b4332;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .plant-list {
+      list-style: none;
+      padding: 0;
+    }
+    .plant-item {
+      background: #e9f5e9;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .plant-item strong {
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌱 Plant Tracker Pro</h1>
+    <p>Track, manage, and learn about your plants</p>
+  </header>
+
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">My Plants</a>
+    <a href="#">Tips</a>
+    <a href="#">About</a>
+  </nav>
+
+  <main>
+    <h2>Add a New Plant</h2>
+    <form id="plantForm">
+      <input type="text" id="plantName" placeholder="Plant Name" required>
+      <select id="plantCategory">
+        <option value="Fruit">Fruit</option>
+        <option value="Vegetable">Vegetable</option>
+        <option value="Flower">Flower</option>
+        <option value="Tree">Tree</option>
+        <option value="Herb">Herb</option>
+        <option value="Indoor">Indoor</option>
+        <option value="Outdoor">Outdoor</option>
+      </select>
+      <input type="date" id="plantDate" required>
+      <input type="text" id="plantLocation" placeholder="Location">
+      <input type="text" id="plantWater" placeholder="Watering Frequency (e.g. 2 days)">
+      <input type="text" id="plantSunlight" placeholder="Sunlight Needs (e.g. Full Sun)">
+      <textarea id="plantNotes" placeholder="Additional Notes..."></textarea>
+      <button type="submit">Add Plant</button>
+    </form>
+
+    <div class="controls">
+      <input type="text" id="searchBar" placeholder="🔍 Search plants...">
+      <select id="filterCategory">
+        <option value="All">All Categories</option>
+        <option value="Fruit">Fruit</option>
+        <option value="Vegetable">Vegetable</option>
+        <option value="Flower">Flower</option>
+        <option value="Tree">Tree</option>
+        <option value="Herb">Herb</option>
+        <option value="Indoor">Indoor</option>
+        <option value="Outdoor">Outdoor</option>
+      </select>
+    </div>
+
+    <h2>My Plants</h2>
+    <ul class="plant-list" id="plantList"></ul>
+  </main>
+
+  <script>
+    const form = document.getElementById("plantForm");
+    const plantList = document.getElementById("plantList");
+    const searchBar = document.getElementById("searchBar");
+    const filterCategory = document.getElementById("filterCategory");
+
+    // Load saved plants
+    let plants = JSON.parse(localStorage.getItem("plants")) || [];
+
+    function displayPlants() {
+      plantList.innerHTML = "";
+      let search = searchBar.value.toLowerCase();
+      let filter = filterCategory.value;
+
+      plants
+        .filter(p => (filter === "All" || p.category === filter))
+        .filter(p => p.name.toLowerCase().includes(search))
+        .forEach(p => {
+          const li = document.createElement("li");
+          li.className = "plant-item";
+          li.innerHTML = `
+            <strong>${p.name}</strong> (${p.category}) <br>
+            🌱 Planted on: ${p.date} <br>
+            📍 Location: ${p.location} <br>
+            💧 Watering: ${p.water} <br>
+            ☀️ Sunlight: ${p.sunlight} <br>
+            📝 Notes: ${p.notes}
+          `;
+          plantList.appendChild(li);
+        });
+    }
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const newPlant = {
+        name: document.getElementById("plantName").value,
+        category: document.getElementById("plantCategory").value,
+        date: document.getElementById("plantDate").value,
+        location: document.getElementById("plantLocation").value,
+        water: document.getElementById("plantWater").value,
+        sunlight: document.getElementById("plantSunlight").value,
+        notes: document.getElementById("plantNotes").value
+      };
+
+      plants.push(newPlant);
+      localStorage.setItem("plants", JSON.stringify(plants));
+
+      form.reset();
+      displayPlants();
+    });
+
+    searchBar.addEventListener("input", displayPlants);
+    filterCategory.addEventListener("change", displayPlants);
+
+    // Initial display
+    displayPlants();
+  </script>
+</body>
+</html>
